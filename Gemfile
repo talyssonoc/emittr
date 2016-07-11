@@ -2,6 +2,6 @@ source 'https://rubygems.org'
 
 gemspec
 
-group :development do
-  gem 'pry'
-end
+gem 'pry', group: :development
+
+gem 'simplecov', require: false, group: :test
