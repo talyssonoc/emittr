@@ -6,11 +6,14 @@ describe Emittr do
   describe '#on' do
     it 'should add callback to listeners list' do
       callback = Proc.new {}
+      callback_inst = Emittr::Callback.new(&callback)
+
+      allow(Emittr::Callback).to receive(:new).and_return(callback_inst)
 
       emitter.on :on_test, &callback
 
       listeners = emitter.send(:listeners)
-      expect(listeners[:on_test].first).to eql(callback)
+      expect(listeners[:on_test].first).to eql(callback_inst)
     end
 
     context 'when no block is passed' do
@@ -42,7 +45,7 @@ describe Emittr do
           emitter.emit :off_test
 
           listeners = emitter.send(:listeners)
-          expect(listeners[:off_test]).to be_nil
+          expect(listeners[:off_test]).to be_empty
           expect(callback).not_to have_received(:call)
         end
       end

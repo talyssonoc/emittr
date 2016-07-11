@@ -6,18 +6,9 @@ module Emittr
 
     module InstanceMethods
       def on(event, &callback)
-        unless block_given?
-          raise ArgumentError, 'required block not passed'
-        end
+        raise ArgumentError, 'required block not passed' unless block_given?
 
-        event = event.to_sym
-
-        if listeners.key? event
-          listeners[event] << callback
-        else
-          listeners[event] = [callback]
-        end
-
+        listeners[event.to_sym] << ::Emittr::Callback.new(&callback)
         self
       end
 
@@ -29,7 +20,6 @@ module Emittr
         else
           listeners.delete event
         end
-
 
         self
       end
@@ -47,7 +37,7 @@ module Emittr
       private
 
       def listeners
-        @listeners ||= {}
+        @listeners ||= Hash.new { |h,k| h[k] = [] }
       end
     end
   end
