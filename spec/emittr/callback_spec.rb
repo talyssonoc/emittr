@@ -24,9 +24,7 @@ describe Emittr::Callback do
     context 'when same callbacks' do
       it 'returns true' do
         cb = Emittr::Callback.new &callback
-        second_cb = Emittr::Callback.new &callback
-
-        expect(cb == second_cb).to be true
+        expect(cb == callback).to be true
       end
     end
 
@@ -34,19 +32,21 @@ describe Emittr::Callback do
       it 'returns true' do
         diff_callback = Proc.new {}
         cb = Emittr::Callback.new &callback
-        second_cb = Emittr::Callback.new &diff_callback
-        second_cb.wrapper = cb
+        cb.wrapper = diff_callback
 
-        expect(cb == second_cb).to be true
+        expect(cb == diff_callback).to be true
       end
     end
 
-    context 'when an invalid param is provided' do
-      it 'raises ArgumentError' do
+    context 'when a different callback is passed' do
+      it 'returns false' do
+        wrapper_callback = Proc.new {}
+        unset_callback = Proc.new {}
+
         cb = Emittr::Callback.new &callback
-        expect {
-          cb == :test
-        }.to raise_error ArgumentError, 'must be an instance of Emittr::Callback'
+        cb.wrapper = wrapper_callback
+
+        expect(cb == unset_callback).to be false
       end
     end
   end

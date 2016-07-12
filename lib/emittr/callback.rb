@@ -11,8 +11,7 @@ module Emittr
     end
 
     def ==(cb)
-      raise ArgumentError, 'must be an instance of Emittr::Callback' unless cb.is_a? Callback
-      cb.callback == callback || self.equal?(cb.wrapper)
+      callback == cb || wrapper == cb
     end
   end
 end
