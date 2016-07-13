@@ -77,6 +77,32 @@ describe Emittr do
     end
   end
 
+  describe '#once' do
+    let(:block) { Proc.new {} }
+
+    it 'adds listener to listeners list' do
+      expect {
+        emitter.once :once_test, &block
+      }.to change(emitter.send(:listeners)[:once_test], :count).by 1
+    end
+
+    context 'when event is emitted' do
+      before { emitter.once :once_test, &block }
+
+      it 'calls callback only once' do
+        expect(block).to receive(:call).once
+        2.times { emitter.emit :once_test }
+      end
+
+      it 'removes listener from listeners list when emitted' do
+        emitter.emit :once_test
+        listeners = emitter.send(:listeners)
+
+        expect(listeners[:once_test]).to be_empty
+      end
+    end
+  end
+
   describe '#emit' do
     context "when events don't have payload" do
       it 'should call the callbacks' do
