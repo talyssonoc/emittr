@@ -39,7 +39,21 @@ module Emittr
         on(event, &off_block)
       end
 
+      def on_any(&block)
+        on(:*, &block)
+      end
+
+      def off_any(&block)
+        off(:*, &block)
+      end
+
+      def once_any(&block)
+        once(:*, &block)
+      end
+
       def emit(event, *payload)
+        emit_any(event, *payload)
+
         return unless listeners.key? event
 
         listeners[event].each do |l|
@@ -53,10 +67,19 @@ module Emittr
         listeners[event.to_sym].dup
       end
 
+      def listeners_for_any
+        listeners[:*].dup
+      end
+
       private
 
       def listeners
         @listeners ||= Hash.new { |h,k| h[k] = [] }
+      end
+
+      def emit_any(event, *payload)
+        any_listeners = listeners[:*]
+        any_listeners.each { |l| l.call(event, *payload) } if any_listeners.any?
       end
     end
   end

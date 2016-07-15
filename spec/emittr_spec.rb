@@ -101,6 +101,103 @@ describe Emittr do
     end
   end
 
+  describe '#on_any' do
+    let(:any_block) { Proc.new {} }
+
+    context 'when listeners for a specific event are set' do
+      it 'calls #on_any blocks' do
+        block = Proc.new {}
+
+        emitter.on_any &any_block
+
+        emitter.on :first_any_test, &block
+        emitter.on :second_any_test, &block
+
+        expect(any_block).to receive(:call).with(:first_any_test).twice
+        expect(any_block).to receive(:call).with(:second_any_test).twice
+
+        2.times { emitter.emit :first_any_test }
+        2.times { emitter.emit :second_any_test }
+      end
+    end
+
+    context 'when no events are set' do
+      it 'calls #on_any blocks' do
+        emitter.on_any &any_block
+
+        expect(any_block).to receive(:call).with(:on_any_test).twice
+
+        2.times { emitter.emit :on_any_test }
+      end
+    end
+  end
+
+  describe '#off_any' do
+    let(:block) { Proc.new {} }
+
+    it 'removes listener from #any list' do
+      block_for_on = Proc.new {}
+
+      emitter.on :off_any_test, &block_for_on
+      listeners = emitter.send(:listeners)
+
+      emitter.on_any &block
+
+      expect(block).to receive(:call).with(:off_any_test)
+      emitter.emit :off_any_test
+      expect(emitter.listeners_for_any).not_to be_empty
+
+      emitter.off_any &block
+
+      expect(block).not_to receive(:call).with(:off_any_test)
+      emitter.emit :off_any_test
+      expect(emitter.listeners_for_any).to be_empty
+    end
+
+    it "doesn't call block" do
+      emitter.on(:off_any_test) { Proc.new {} }
+
+      emitter.on_any &block
+      expect(block).to receive(:call)
+      emitter.emit :off_any_test
+
+      emitter.off_any &block
+      expect(block).not_to receive(:call)
+      emitter.emit :off_any_test
+    end
+  end
+
+  describe '#once_any' do
+    let(:block)    { Proc.new {} }
+    let(:on_block) { Proc.new {} }
+
+    it 'adds listener to #any listeners list' do
+      expect {
+        emitter.once_any &block
+      }.to change(emitter.send(:listeners)[:*], :count).by 1
+    end
+
+    context 'when any event is emitted' do
+      it 'calls block added to any list only once' do
+        emitter.once_any &block
+        emitter.on :once_any_test, &on_block
+
+        expect(block).to receive(:call).once
+        2.times { emitter.emit :once_any_test }
+      end
+
+      it 'removes listener from listeners list after emitted' do
+        emitter.once_any &block
+        emitter.on :once_any_test, &on_block
+
+        emitter.emit :once_any_test
+
+        listeners = emitter.send(:listeners)
+        expect(emitter.listeners_for_any).to be_empty
+      end
+    end
+  end
+
   describe '#emit' do
     context "when events don't have payload" do
       it 'should call the callbacks' do
@@ -159,6 +256,23 @@ describe Emittr do
       expect {
         emitter.listeners_for(event) << Proc.new {}
       }.not_to change { emitter.listeners_for(event).count }
+    end
+  end
+
+  describe '#listeners_for_any' do
+    let(:block) { Proc.new {} }
+
+    it 'retrieve listeners for "any" list' do
+      emitter.on_any &block
+      expect( emitter.listeners_for_any ).to eq [block]
+    end
+
+    it "can't be changed externally" do
+      emitter.on_any &block
+
+      expect {
+        emitter.listeners_for_any << Proc.new {}
+      }.not_to change { emitter.listeners_for_any.count }
     end
   end
 end
