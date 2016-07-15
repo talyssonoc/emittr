@@ -49,6 +49,10 @@ module Emittr
         self
       end
 
+      def listeners_for(event)
+        listeners[event.to_sym].dup
+      end
+
       private
 
       def listeners

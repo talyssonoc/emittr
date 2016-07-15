@@ -12,8 +12,8 @@ describe Emittr do
 
       emitter.on :on_test, &callback
 
-      listeners = emitter.send(:listeners)
-      expect(listeners[:on_test].first).to eql(callback_inst)
+      listeners = emitter.listeners_for(:on_test)
+      expect(listeners).to eq [callback_inst]
     end
 
     context 'when no block is passed' do
@@ -44,8 +44,8 @@ describe Emittr do
           emitter.off :off_test
           emitter.emit :off_test
 
-          listeners = emitter.send(:listeners)
-          expect(listeners[:off_test]).to be_empty
+          listeners = emitter.listeners_for(:off_test)
+          expect(listeners).to be_empty
           expect(callback).not_to have_received(:call)
         end
       end
@@ -69,8 +69,8 @@ describe Emittr do
           emitter.off :off_test, &callback
           emitter.emit :off_test
 
-          listeners = emitter.send(:listeners)
-          expect(listeners[:off_test]).to be_empty
+          listeners = emitter.listeners_for(:off_test)
+          expect(listeners).to be_empty
           expect(callback).not_to have_received(:call)
         end
       end
@@ -83,7 +83,7 @@ describe Emittr do
     it 'adds listener to listeners list' do
       expect {
         emitter.once :once_test, &block
-      }.to change(emitter.send(:listeners)[:once_test], :count).by 1
+      }.to change { emitter.listeners_for(:once_test).count }.by 1
     end
 
     context 'when event is emitted' do
@@ -96,9 +96,7 @@ describe Emittr do
 
       it 'removes listener from listeners list when emitted' do
         emitter.emit :once_test
-        listeners = emitter.send(:listeners)
-
-        expect(listeners[:once_test]).to be_empty
+        expect(emitter.listeners_for(:once_test)).to be_empty
       end
     end
   end
@@ -142,6 +140,25 @@ describe Emittr do
           emitter.emit :emit_test
         }.not_to raise_error
       end
+    end
+  end
+
+  describe '#listeners_for' do
+    let(:block) { Proc.new {} }
+
+    it 'retrieve listeners for provided event' do
+      event = :listener
+      emitter.on event, &block
+      expect( emitter.listeners_for(event) ).to eq [block]
+    end
+
+    it "can't be changed externally" do
+      event = :listener
+      emitter.on event, &block
+
+      expect {
+        emitter.listeners_for(event) << Proc.new {}
+      }.not_to change { emitter.listeners_for(event).count }
     end
   end
 end
