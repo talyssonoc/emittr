@@ -75,6 +75,19 @@ describe Emittr do
         end
       end
     end
+
+    describe 'without event' do
+      let(:block) { Proc.new {} }
+
+      it 'empty listeners list' do
+        emitter.on :first_clear_test, &block
+        emitter.on :second_clear_test, &block
+
+        expect(emitter.send(:listeners).count).to eq 2
+        emitter.off
+        expect(emitter.send(:listeners).count).to eq 0
+      end
+    end
   end
 
   describe '#once' do

@@ -12,8 +12,11 @@ module Emittr
         self
       end
 
-      def off(event, &block)
-        return unless listeners.key? event
+      def off(event=nil, &block)
+        unless event
+          listeners.clear
+          return self
+        end
 
         if block_given?
           listeners[event].reject! { |l| l == block }
