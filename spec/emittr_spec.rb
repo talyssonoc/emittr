@@ -17,7 +17,7 @@ describe Emittr do
   describe '#on' do
     include_examples 'no_block_passed', :on
 
-    it 'should add callback to listeners list' do
+    it 'adds callback to listeners list' do
       callback = Proc.new {}
       callback_inst = Emittr::Callback.new(&callback)
 
@@ -33,7 +33,7 @@ describe Emittr do
   describe '#off' do
     describe 'without callback' do
       context 'when there are no listeners to the given event' do
-        it 'should not throw an error' do
+        it "doesn't throw an error" do
           expect {
             emitter.off :off_test
           }.to_not raise_error
@@ -41,7 +41,7 @@ describe Emittr do
       end
 
       context 'when there are listeners to given event' do
-        it 'should remove all listeners for event' do
+        it 'removes all listeners for event' do
           callback = Proc.new {}
           allow(callback).to receive(:call)
           emitter.on :off_test, &callback
@@ -58,7 +58,7 @@ describe Emittr do
 
     describe 'with callback' do
       context 'when there are no listeners to the given event' do
-        it 'should not throw an error' do
+        it "doesn't throw an error" do
           expect {
             emitter.off :off_test
           }.to_not raise_error
@@ -66,7 +66,7 @@ describe Emittr do
       end
 
       context 'when there are listeners to given event' do
-        it 'should remove listeners for event' do
+        it 'removes listeners for event' do
           callback = Proc.new {}
           allow(callback).to receive(:call)
           emitter.on :off_test, &callback
@@ -81,7 +81,7 @@ describe Emittr do
       end
     end
 
-    describe 'without event' do
+    describe 'when no event is passed' do
       let(:block) { Proc.new {} }
 
       it 'empty listeners list' do
@@ -225,8 +225,8 @@ describe Emittr do
   end
 
   describe '#emit' do
-    context "when events don't have payload" do
-      it 'should call the callbacks' do
+    context "when events doesn't have payload" do
+      it 'calls the callbacks' do
         callback = Proc.new {}
         callback_2 = Proc.new {}
         allow(callback).to receive(:call)
@@ -242,7 +242,7 @@ describe Emittr do
     end
 
     context 'when events have payload' do
-      it 'should call the callbacks with the payload' do
+      it 'calls the callbacks with the payload' do
         callback = Proc.new {}
         callback_2 = Proc.new { |a, b| }
         allow(callback).to receive(:call)
@@ -258,7 +258,7 @@ describe Emittr do
     end
 
     context 'when there are no listeners to given event' do
-      it 'should not throw an error' do
+      it "doesn't throw an error" do
         expect {
           emitter.emit :emit_test
         }.not_to raise_error
