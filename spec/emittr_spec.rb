@@ -3,7 +3,20 @@ require 'spec_helper'
 describe Emittr do
   let(:emitter) { Emittr::Emitter.new }
 
+  shared_examples_for 'no_block_passed' do |emitter_method|
+
+    context 'when no block is passed' do
+      it 'should throw an argument error' do
+        expect {
+          emitter.send(emitter_method, :no_block_test)
+        }.to raise_error ArgumentError
+      end
+    end
+  end
+
   describe '#on' do
+    include_examples 'no_block_passed', :on
+
     it 'should add callback to listeners list' do
       callback = Proc.new {}
       callback_inst = Emittr::Callback.new(&callback)
@@ -14,14 +27,6 @@ describe Emittr do
 
       listeners = emitter.listeners_for(:on_test)
       expect(listeners).to eq [callback_inst]
-    end
-
-    context 'when no block is passed' do
-      it 'should throw an argument error' do
-        expect {
-          emitter.on :on_test
-        }.to raise_error(ArgumentError)
-      end
     end
   end
 
@@ -91,6 +96,8 @@ describe Emittr do
   end
 
   describe '#once' do
+    include_examples 'no_block_passed', :once
+
     let(:block) { Proc.new {} }
 
     it 'adds listener to listeners list' do
@@ -115,6 +122,8 @@ describe Emittr do
   end
 
   describe '#on_any' do
+    include_examples 'no_block_passed', :on_any
+
     let(:any_block) { Proc.new {} }
 
     context 'when listeners for a specific event are set' do
@@ -146,6 +155,8 @@ describe Emittr do
   end
 
   describe '#off_any' do
+    include_examples 'no_block_passed', :off_any
+
     let(:block) { Proc.new {} }
 
     it 'removes listener from #any list' do
@@ -181,6 +192,8 @@ describe Emittr do
   end
 
   describe '#once_any' do
+    include_examples 'no_block_passed', :once_any
+
     let(:block)    { Proc.new {} }
     let(:on_block) { Proc.new {} }
 

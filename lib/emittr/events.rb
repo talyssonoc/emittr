@@ -6,7 +6,7 @@ module Emittr
 
     module InstanceMethods
       def on(event, &block)
-        raise ArgumentError, 'required block not passed' unless block_given?
+        raise_no_block_error unless block_given?
 
         listeners[event.to_sym] << ::Emittr::Callback.new(&block)
         self
@@ -28,6 +28,8 @@ module Emittr
       end
 
       def once(event, &block)
+        raise_no_block_error unless block_given?
+
         callback = ::Emittr::Callback.new &block
 
         off_block = Proc.new do |args|
@@ -43,14 +45,17 @@ module Emittr
       end
 
       def on_any(&block)
+        raise_no_block_error unless block_given?
         on(:*, &block)
       end
 
       def off_any(&block)
+        raise_no_block_error unless block_given?
         off(:*, &block)
       end
 
       def once_any(&block)
+        raise_no_block_error unless block_given?
         once(:*, &block)
       end
 
@@ -83,6 +88,10 @@ module Emittr
       def emit_any(event, *payload)
         any_listeners = listeners[:*]
         any_listeners.each { |l| l.call(event, *payload) } if any_listeners.any?
+      end
+
+      def raise_no_block_error
+        raise ArgumentError, 'required block not passed'
       end
     end
   end
