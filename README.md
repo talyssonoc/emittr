@@ -2,6 +2,8 @@
 
 Emittr is a event emitter for Ruby.
 
+[![Build Status](https://travis-ci.org/talyssonoc/emittr.svg?branch=master)](https://travis-ci.org/talyssonoc/emittr) [![Coverage Status](https://coveralls.io/repos/github/talyssonoc/emittr/badge.svg?branch=master)](https://coveralls.io/github/talyssonoc/emittr?branch=master)
+
 Installation
 ------------
 
