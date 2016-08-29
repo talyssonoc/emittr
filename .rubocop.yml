@@ -1,0 +1,9 @@
+AllCops:
+  Exclude:
+    - 'lib/emittr/version.rb'
+
+Documentation:
+  Enabled: false
+
+Style/BlockDelimiters:
+  Enabled: false

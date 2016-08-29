@@ -12,7 +12,7 @@ module Emittr
         self
       end
 
-      def off(event=nil, &block)
+      def off(event = nil, &block)
         unless event
           listeners.clear
           return self
@@ -30,9 +30,9 @@ module Emittr
       def once(event, &block)
         raise_no_block_error unless block_given?
 
-        callback = ::Emittr::Callback.new &block
+        callback = ::Emittr::Callback.new(&block)
 
-        off_block = Proc.new do |args|
+        off_block = proc do |args|
           callback.call(*args)
           block_to_send = callback.wrapper || callback.callback
 
@@ -82,7 +82,7 @@ module Emittr
       private
 
       def listeners
-        @listeners ||= Hash.new { |h,k| h[k] = [] }
+        @listeners ||= Hash.new { |h, k| h[k] = [] }
       end
 
       def emit_any(event, *payload)

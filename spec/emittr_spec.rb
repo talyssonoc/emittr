@@ -4,7 +4,6 @@ describe Emittr do
   let(:emitter) { Emittr::Emitter.new }
 
   shared_examples_for 'no_block_passed' do |emitter_method|
-
     context 'when no block is passed' do
       it 'should throw an argument error' do
         expect {
@@ -18,7 +17,7 @@ describe Emittr do
     include_examples 'no_block_passed', :on
 
     it 'adds callback to listeners list' do
-      callback = Proc.new {}
+      callback = proc {}
       callback_inst = Emittr::Callback.new(&callback)
 
       allow(Emittr::Callback).to receive(:new).and_return(callback_inst)
@@ -42,7 +41,7 @@ describe Emittr do
 
       context 'when there are listeners to given event' do
         it 'removes all listeners for event' do
-          callback = Proc.new {}
+          callback = proc {}
           allow(callback).to receive(:call)
           emitter.on :off_test, &callback
 
@@ -67,7 +66,7 @@ describe Emittr do
 
       context 'when there are listeners to given event' do
         it 'removes listeners for event' do
-          callback = Proc.new {}
+          callback = proc {}
           allow(callback).to receive(:call)
           emitter.on :off_test, &callback
 
@@ -82,7 +81,7 @@ describe Emittr do
     end
 
     describe 'when no event is passed' do
-      let(:block) { Proc.new {} }
+      let(:block) { proc {} }
 
       it 'empty listeners list' do
         emitter.on :first_clear_test, &block
@@ -98,7 +97,7 @@ describe Emittr do
   describe '#once' do
     include_examples 'no_block_passed', :once
 
-    let(:block) { Proc.new {} }
+    let(:block) { proc {} }
 
     it 'adds listener to listeners list' do
       expect {
@@ -124,13 +123,13 @@ describe Emittr do
   describe '#on_any' do
     include_examples 'no_block_passed', :on_any
 
-    let(:any_block) { Proc.new {} }
+    let(:any_block) { proc {} }
 
     context 'when listeners for a specific event are set' do
       it 'calls #on_any blocks' do
-        block = Proc.new {}
+        block = proc {}
 
-        emitter.on_any &any_block
+        emitter.on_any(&any_block)
 
         emitter.on :first_any_test, &block
         emitter.on :second_any_test, &block
@@ -145,7 +144,7 @@ describe Emittr do
 
     context 'when no events are set' do
       it 'calls #on_any blocks' do
-        emitter.on_any &any_block
+        emitter.on_any(&any_block)
 
         expect(any_block).to receive(:call).with(:on_any_test).twice
 
@@ -157,21 +156,20 @@ describe Emittr do
   describe '#off_any' do
     include_examples 'no_block_passed', :off_any
 
-    let(:block) { Proc.new {} }
+    let(:block) { proc {} }
 
     it 'removes listener from #any list' do
-      block_for_on = Proc.new {}
+      block_for_on = proc {}
 
       emitter.on :off_any_test, &block_for_on
-      listeners = emitter.send(:listeners)
 
-      emitter.on_any &block
+      emitter.on_any(&block)
 
       expect(block).to receive(:call).with(:off_any_test)
       emitter.emit :off_any_test
       expect(emitter.listeners_for_any).not_to be_empty
 
-      emitter.off_any &block
+      emitter.off_any(&block)
 
       expect(block).not_to receive(:call).with(:off_any_test)
       emitter.emit :off_any_test
@@ -179,13 +177,13 @@ describe Emittr do
     end
 
     it "doesn't call block" do
-      emitter.on(:off_any_test) { Proc.new {} }
+      emitter.on(:off_any_test) { proc {} }
 
-      emitter.on_any &block
+      emitter.on_any(&block)
       expect(block).to receive(:call)
       emitter.emit :off_any_test
 
-      emitter.off_any &block
+      emitter.off_any(&block)
       expect(block).not_to receive(:call)
       emitter.emit :off_any_test
     end
@@ -194,18 +192,18 @@ describe Emittr do
   describe '#once_any' do
     include_examples 'no_block_passed', :once_any
 
-    let(:block)    { Proc.new {} }
-    let(:on_block) { Proc.new {} }
+    let(:block)    { proc {} }
+    let(:on_block) { proc {} }
 
     it 'adds listener to #any listeners list' do
       expect {
-        emitter.once_any &block
+        emitter.once_any(&block)
       }.to change(emitter.send(:listeners)[:*], :count).by 1
     end
 
     context 'when any event is emitted' do
       it 'calls block added to any list only once' do
-        emitter.once_any &block
+        emitter.once_any(&block)
         emitter.on :once_any_test, &on_block
 
         expect(block).to receive(:call).once
@@ -213,12 +211,11 @@ describe Emittr do
       end
 
       it 'removes listener from listeners list after emitted' do
-        emitter.once_any &block
+        emitter.once_any(&block)
         emitter.on :once_any_test, &on_block
 
         emitter.emit :once_any_test
 
-        listeners = emitter.send(:listeners)
         expect(emitter.listeners_for_any).to be_empty
       end
     end
@@ -227,8 +224,8 @@ describe Emittr do
   describe '#emit' do
     context "when events doesn't have payload" do
       it 'calls the callbacks' do
-        callback = Proc.new {}
-        callback_2 = Proc.new {}
+        callback = proc {}
+        callback_2 = proc {}
         allow(callback).to receive(:call)
         allow(callback_2).to receive(:call)
         emitter.on :emit_test, &callback
@@ -243,8 +240,8 @@ describe Emittr do
 
     context 'when events have payload' do
       it 'calls the callbacks with the payload' do
-        callback = Proc.new {}
-        callback_2 = Proc.new { |a, b| }
+        callback = proc {}
+        callback_2 = proc { |a, b| }
         allow(callback).to receive(:call)
         allow(callback_2).to receive(:call)
         emitter.on :emit_test, &callback
@@ -267,12 +264,12 @@ describe Emittr do
   end
 
   describe '#listeners_for' do
-    let(:block) { Proc.new {} }
+    let(:block) { proc {} }
 
     it 'retrieve listeners for provided event' do
       event = :listener
       emitter.on event, &block
-      expect( emitter.listeners_for(event) ).to eq [block]
+      expect(emitter.listeners_for(event)).to eq [block]
     end
 
     it "can't be changed externally" do
@@ -280,24 +277,24 @@ describe Emittr do
       emitter.on event, &block
 
       expect {
-        emitter.listeners_for(event) << Proc.new {}
+        emitter.listeners_for(event) << proc {}
       }.not_to change { emitter.listeners_for(event).count }
     end
   end
 
   describe '#listeners_for_any' do
-    let(:block) { Proc.new {} }
+    let(:block) { proc {} }
 
     it 'retrieve listeners for "any" list' do
-      emitter.on_any &block
-      expect( emitter.listeners_for_any ).to eq [block]
+      emitter.on_any(&block)
+      expect(emitter.listeners_for_any).to eq [block]
     end
 
     it "can't be changed externally" do
-      emitter.on_any &block
+      emitter.on_any(&block)
 
       expect {
-        emitter.listeners_for_any << Proc.new {}
+        emitter.listeners_for_any << proc {}
       }.not_to change { emitter.listeners_for_any.count }
     end
   end

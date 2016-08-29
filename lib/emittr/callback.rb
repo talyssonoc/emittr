@@ -10,8 +10,8 @@ module Emittr
       callback.call(*args)
     end
 
-    def ==(block)
-      callback == block || wrapper == block
+    def ==(other)
+      callback == other || wrapper == other
     end
   end
 end
