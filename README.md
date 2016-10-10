@@ -56,55 +56,35 @@ server.emit :user_connected, { name: 'Somebody', ip: '127.0.0.1' }
 
 ## Add event listeners
 
-### #on(event, callback)
+* `#on(event, callback)` - Call `callback` when `event` is emitted.
 
-Call `callback` when `event` is emitted.
+* `#once(event, callback)` - Call `callback` when `event` is emitted for the
+first time, then the `callback` is removed from the listeners list of the given `event`.
 
-### #once(event, callback)
+* `#on_any(callback)` - Call `callback` whenever an event is emitted.
 
-Call `callback` when `event` is emitted for the first time, then the `callback` is removed from the listeners list of the given `event`.
-
-### #on_any(callback)
-
-Call `callback` whenever an event is emitted.
-
-### #once_any(callback)
-
-Call `callback` the first time any event is emitted then removes it from list.
+* `#once_any(callback)` - Call `callback` the first time any event is emitted then removes it from list.
 
 ## Remove event listeners
 
-### #off(event, callback)
+* `#off(event, callback)` - Remove `callback` from `event` callbacks list.
 
-Remove `callback` from `event` callbacks list.
+* `#off(event)` - Removes all callbacks for `event`.
 
-### #off(event)
+* `#off` - Removes all callbacks for all events.
 
-Removes all callbacks for `event`.
-
-### #off
-
-Removes all callbacks for all events.
-
-### #off_any(callback)
-
-Remove `callback` from list to be run after any event is emitted.
+* `#off_any(callback)` - Remove `callback` from list to be run after any event is emitted.
 
 ## Emitting events
 
-### #emit(type, *args)
-
-Emit an `event` with all passed `args` as params.
+* `#emit(type, *args)` - Emit an `event` with all passed `args` as params.
 
 ## Retrieving added events
 
-### #listeners_for(event)
+* `#listeners_for(event)` - Return all callbacks for `event`. Callbacks added
+with `#on_any` or `#once_any` will not be included.
 
-Return all callbacks for `event`. Callbacks added with `#on_any` or `#once_any` will not be included.
-
-### #listeners_for_any
-
-Return all callbacks added with `#on_any` or `#once_any`
+* `#listeners_for_any` - Return all callbacks added with `#on_any` or `#once_any`
 
 ## Contributing
 
