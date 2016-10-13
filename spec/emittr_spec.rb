@@ -221,6 +221,42 @@ describe Emittr do
     end
   end
 
+  describe '#on_many_times' do
+    include_examples 'no_block_passed', :on_many_times
+
+    let(:callback) { proc {} }
+
+    it "raises an ArgumentError when first param isn't an Integer" do
+      times = 'A'
+
+      expect {
+        emitter.on_many_times :many, times, &callback
+      }.to raise_error ArgumentError, "#{times} must be an integer"
+    end
+
+    it "raises an ArgumentError when first param is a negative number" do
+      times = -1
+
+      expect {
+        emitter.on_many_times :many, times, &callback
+      }.to raise_error ArgumentError, "#{times} can't be negative"
+    end
+
+    it 'calls callback as many times as provided' do
+      emitter.on_many_times :many, 3, &callback
+
+      expect(callback).to receive(:call).exactly(3).times
+      4.times { emitter.emit :many }
+    end
+
+    it 'removes listener when reaching how many times the callback can run' do
+      emitter.on_many_times :many, 1, &callback
+      2.times { emitter.emit :many }
+
+      expect(emitter.listeners_for(:many)).to be_empty
+    end
+  end
+
   describe '#emit' do
     context "when events doesn't have payload" do
       it 'calls the callbacks' do

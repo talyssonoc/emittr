@@ -59,6 +59,25 @@ module Emittr
         once(:*, &block)
       end
 
+      def on_many_times(event, times, &block)
+        raise_no_block_error unless block_given?
+        raise ArgumentError, "#{times} must be an integer" unless times.is_a? Integer
+        raise ArgumentError, "#{times} can't be negative" if times < 0
+
+        callback = ::Emittr::Callback.new(&block)
+
+        off_block = proc do |args|
+          callback.call(*args)
+          block_to_send = callback.wrapper || callback.callback
+
+          times -= 1
+          off(event, &block_to_send) if times.zero?
+        end
+
+        callback.wrapper = off_block
+        on(event, &off_block)
+      end
+
       def emit(event, *payload)
         emit_any(event, *payload)
 

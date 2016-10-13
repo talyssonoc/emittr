@@ -65,6 +65,10 @@ first time, then the `callback` is removed from the listeners list of the given 
 
 * `#once_any(callback)` - Call `callback` the first time any event is emitted then removes it from list.
 
+* `#on_many_times(event, times, callback)` - Acts like `#once`, but the listener
+will be removed from the list only after emitting the event as many times as
+provided. It accepts only positive Integer number as argument.
+
 ## Remove event listeners
 
 * `#off(event, callback)` - Remove `callback` from `event` callbacks list.
