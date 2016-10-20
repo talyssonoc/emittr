@@ -54,6 +54,29 @@ server = Server.new
 server.emit :user_connected, { name: 'Somebody', ip: '127.0.0.1' }
 ```
 
+Config
+------
+
+### Limiting listeners
+
+You can set a limit to prevent adding listeners by using:
+```ruby
+class Server
+  include Emittr::Events
+
+  max_listeners 20
+end
+```
+or
+
+```ruby
+emitter = Emittr::Emitter.new max_listeners: 20
+```
+
+This value can be get later from `#max_listeners_value`.
+
+**NOTE:** You can't overwrite `#max_listeners` value. If you try to do it, a `RuntimeError` will be raised.
+
 ## Add event listeners
 
 * `#on(event, callback)` - Call `callback` when `event` is emitted.

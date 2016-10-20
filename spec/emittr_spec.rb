@@ -334,4 +334,74 @@ describe Emittr do
       }.not_to change { emitter.listeners_for_any.count }
     end
   end
+
+  describe '#max_listeners' do
+    let(:callback) { proc {} }
+    let(:other_callback) { proc {} }
+
+    shared_examples_for 'regular usage' do |emitter_method|
+      context 'adding new listeners when #max_listeners is set' do
+        context ":#{emitter_method}" do
+          it "doesn't add new listeners when limit is reached" do
+            emitter.max_listeners 1
+            emitter.send emitter_method, :max, &callback
+
+            expect {
+              emitter.send emitter_method, :max, &other_callback rescue RuntimeError
+            }.not_to change(emitter.listeners_for(:max), :count)
+          end
+
+          it 'raises MaxListenersLimit error when adding new listeners' do
+            emitter.max_listeners 1
+            emitter.send emitter_method, :max, &callback
+
+            expect {
+              emitter.send emitter_method, :max, &other_callback
+            }.to raise_error RuntimeError, "can't add more listeners"
+          end
+        end
+      end
+    end
+
+    context 'behaves as it should' do
+      include_examples 'regular usage', :on
+      include_examples 'regular usage', :once
+    end
+
+    context 'when trying to overwrite max_listeners value' do
+      it 'raises RuntimeError' do
+        emitter.max_listeners 1
+
+        expect {
+          emitter.max_listeners 2
+        }.to raise_error RuntimeError, "can't overwrite max listeners value"
+      end
+
+      it "doesn't change max_listeners value" do
+        emitter.max_listeners 1
+
+        expect {
+          emitter.max_listeners 2 rescue RuntimeError
+        }.not_to change { emitter.max_listeners_value }
+      end
+    end
+    
+    context 'when providing max_listeners value on Emittr::Emitter build' do
+      let(:listeners) { Emittr::Listeners.new emitter }
+
+      before { allow(emitter).to receive(:listeners).and_return(listeners) }
+
+      it 'sets max_listeners_value properly' do
+        emitter = Emittr::Emitter.new(max_listeners: 2)
+        listeners = Emittr::Listeners.new emitter
+
+        allow(emitter).to receive(:listeners).and_return(listeners)
+
+        expect(listeners.max_listeners_value).to eq 2
+      end
+
+      include_examples 'regular usage', :on
+      include_examples 'regular usage', :once
+    end
+  end
 end

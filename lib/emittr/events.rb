@@ -5,10 +5,14 @@ module Emittr
     end
 
     module InstanceMethods
+      extend Forwardable
+
+      def_delegators :listeners, :max_listeners, :max_listeners
+      def_delegators :listeners, :max_listeners_value, :max_listeners_value
+
       def on(event, &block)
         raise_no_block_error unless block_given?
-
-        listeners[event.to_sym] << ::Emittr::Callback.new(&block)
+        listeners.add_listener event.to_sym, ::Emittr::Callback.new(&block)
         self
       end
 
@@ -91,21 +95,21 @@ module Emittr
       end
 
       def listeners_for(event)
-        listeners[event.to_sym].dup
+        listeners.for event.to_sym
       end
 
       def listeners_for_any
-        listeners[:*].dup
+        listeners.for :*
       end
 
       private
 
       def listeners
-        @listeners ||= Hash.new { |h, k| h[k] = [] }
+        @listeners ||= Listeners.new(self)
       end
 
       def emit_any(event, *payload)
-        any_listeners = listeners[:*]
+        any_listeners = listeners_for_any
         any_listeners.each { |l| l.call(event, *payload) } if any_listeners.any?
       end
 
